@@ -1,9 +1,9 @@
 ---
 deployment:
   tasks:
-    # Assumes rogaircon.co.za is the account's PRIMARY domain (docroot
-    # public_html). For an addon domain, point DEPLOYPATH at its own docroot.
+    # rogaircon.co.za is the account's PRIMARY domain, so public_html is its docroot.
     - export DEPLOYPATH=$HOME/public_html/
     - /bin/mkdir -p $DEPLOYPATH/assets
-    - /bin/cp -f index.html styles.css robots.txt $DEPLOYPATH
+    - /bin/cp -f *.html robots.txt sitemap.xml .htaccess $DEPLOYPATH
     - /bin/cp -Rf assets/. $DEPLOYPATH/assets/
+    - /bin/rm -f $DEPLOYPATH/styles.css $DEPLOYPATH/assets/favicon.svg
