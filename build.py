@@ -125,7 +125,7 @@ def checks(items):
 
 # ---------------------------------------------------------------- layout
 NAV = [("index.html", "Home"), ("commercial-refrigeration.html", "Refrigeration"),
-       ("air-conditioning.html", "Air-conditioning"), ("contact.html", "Contact")]
+       ("air-conditioning.html", "Air-conditioning"), ("about.html", "About"), ("contact.html", "Contact")]
 
 
 def schema():
@@ -231,6 +231,7 @@ def page(slug, title, description, body, home=False):
       <div>
         <h3>Contact</h3>
         <ul>
+          <li><a href="about.html">About Rog</a></li>
           <li><a href="{tel()}">{escape(C['phone_display'])}</a></li>
           <li><a href="{wa()}" target="_blank" rel="noopener">WhatsApp</a></li>
           {email_li}
@@ -548,6 +549,68 @@ def aircon():
                 body)
 
 
+def about():
+    values = "".join(
+        f'<div class="service reveal">{ICON[i]}<h3>{t}</h3><p>{p}</p></div>' for i, t, p in [
+            ("service", "Done properly", "Units mounted securely, pipework and wiring neat, and every job tested before we leave. No shortcuts that come back to bite you in summer."),
+            ("clock", "Quick to respond", "A warm cold room or a dead bottle cooler costs money every hour. We understand that, and we get to you fast."),
+            ("wallet", "Straight talk on price", "You get a clear quote before work starts, and an honest view on whether to repair or replace."),
+        ])
+    body = f"""
+<section class="page-hero">
+  <div class="wrap">
+    <div>
+      <p class="label">{ICON['snow']}About Rog</p>
+      <h1>Durban&rsquo;s commercial cooling specialists, based in Chatsworth</h1>
+      <p class="lede">Rog Air-Conditioning &amp; Refrigeration installs, repairs and services the cooling equipment that businesses depend on, from a single bottle cooler to a full cold room.</p>
+      {call_btns()}
+    </div>
+    <img src="assets/img/condenser-install-vacuum-pump.webp" alt="Rog technician's equipment set up for an outdoor unit installation" width="900" height="1200" fetchpriority="high">
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap split">
+    <div class="reveal">
+      <p class="label">{ICON['snow']}Who we are</p>
+      <h2>Cool comfort. Fresh solutions.</h2>
+      <p>We&rsquo;re a Durban air-conditioning and refrigeration business working out of Kharwastan, Chatsworth. Our focus is <strong>commercial work</strong>: the cold rooms, coolers, display fridges and air-conditioners that keep shops, restaurants, supermarkets and offices running.</p>
+      <p>When a fridge full of stock stops cooling, or an office aircon packs up in the middle of a Durban summer, you need someone who answers the phone, turns up and fixes it properly. That&rsquo;s the service we&rsquo;ve built Rog around.</p>
+      <p>We also look after homes, so the same technicians who keep a supermarket&rsquo;s cold room running can install or service the aircon in your house.</p>
+    </div>
+    <img class="reveal" src="assets/img/outdoor-units-commercial-building.webp" alt="Outdoor air-conditioning units installed on a commercial building" loading="lazy">
+  </div>
+</section>
+
+<section class="section section-alt">
+  <div class="wrap">
+    {head("How we work", "What you can expect from us")}
+    <div class="services">{values}</div>
+  </div>
+</section>
+
+{sectors_section()}
+
+<section class="section">
+  <div class="wrap split flip">
+    <div class="reveal">
+      <p class="label">{ICON['snow']}Where we work</p>
+      <h2>Based in Chatsworth, working across Durban</h2>
+      <p>Our base is at {escape(C['street'])}, {escape(C['suburb'])}, Chatsworth. From there we cover Durban and the surrounding areas for installations, repairs and servicing.</p>
+      {checks(["Commercial air-conditioning and refrigeration", "All makes and models", "Installation, repairs and servicing", "Homes, shops, restaurants, supermarkets and industry"])}
+      <a class="btn btn-primary" href="contact.html">Get in touch</a>
+    </div>
+    <img class="reveal" src="assets/img/pharmacy-display-fridge.webp" alt="Upright glass-door display fridge in a pharmacy" loading="lazy">
+  </div>
+</section>
+
+{cta_band()}
+"""
+    return page("about.html", f"About Us | {C['legal_name']}",
+                "Rog Air-Conditioning & Refrigeration is a commercial cooling specialist based in Kharwastan, Chatsworth, installing, repairing and servicing refrigeration and air-conditioning across Durban.",
+                body)
+
+
 def contact():
     email_card = (f'<a class="contact-card" href="mailto:{C["email"]}">{ICON["mail"]}<div><span>Email</span><strong>{C["email"]}</strong></div></a>'
                   if C["email"] else "")
@@ -621,6 +684,7 @@ PAGES = {
     "index.html": home,
     "commercial-refrigeration.html": refrigeration,
     "air-conditioning.html": aircon,
+    "about.html": about,
     "contact.html": contact,
     "404.html": not_found,
 }
