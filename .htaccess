@@ -1,4 +1,10 @@
-# HTTPS/www canonical redirect is added once AutoSSL has issued a real certificate.
+# Single canonical host: https://rogaircon.co.za (Let's Encrypt via cPanel AutoSSL)
+RewriteEngine On
+RewriteCond %{HTTP_HOST} ^www\. [NC,OR]
+RewriteCond %{HTTPS} off
+RewriteCond %{REQUEST_URI} !^/\.well-known/
+RewriteRule ^ https://rogaircon.co.za%{REQUEST_URI} [L,R=301]
+
 ErrorDocument 404 /404.html
 Options -Indexes
 
