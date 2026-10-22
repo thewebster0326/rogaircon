@@ -6,4 +6,4 @@ deployment:
     - /bin/mkdir -p $DEPLOYPATH/assets
     - /bin/cp -f *.html robots.txt sitemap.xml .htaccess $DEPLOYPATH
     - /bin/cp -Rf assets/. $DEPLOYPATH/assets/
-    - /bin/rm -f $DEPLOYPATH/styles.css $DEPLOYPATH/assets/favicon.svg
+    - /bin/rm -f $DEPLOYPATH/styles.css $DEPLOYPATH/assets/favicon.svg $DEPLOYPATH/assets/img/rog-logo.png $DEPLOYPATH/assets/img/rog-logo.webp $DEPLOYPATH/assets/img/rog-logo-white.webp
