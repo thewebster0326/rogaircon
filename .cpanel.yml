@@ -1,7 +1,7 @@
 ---
 deployment:
   tasks:
-    # rogaircon.co.za is the account's PRIMARY domain, so public_html is its docroot.
+    # rmairsolutions.co.za is the account's PRIMARY domain, so public_html is its docroot.
     - export DEPLOYPATH=$HOME/public_html/
     - /bin/mkdir -p $DEPLOYPATH/assets
     - /bin/cp -f *.html robots.txt sitemap.xml .htaccess $DEPLOYPATH

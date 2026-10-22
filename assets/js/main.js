@@ -34,7 +34,7 @@
     form.addEventListener('submit', function (ev) {
       ev.preventDefault();
       var f = form.elements;
-      var lines = ['Hi Rog, I would like a quote.', '',
+      var lines = ['Hi RM Air Solutions, I would like a quote.', '',
         'Name: ' + f.name.value.trim()];
       if (f.business.value.trim()) lines.push('Business: ' + f.business.value.trim());
       lines.push('Area: ' + f.area.value.trim(), 'Service: ' + f.service.value);

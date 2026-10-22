@@ -56,8 +56,14 @@ svg { flex: none; }
 .site-header { position: sticky; top: 0; z-index: 50; background: rgba(255, 255, 255, .96); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
 .site-header .wrap { display: flex; align-items: center; gap: 28px; min-height: 80px; }
 .brand { display: flex; align-items: center; gap: 12px; text-decoration: none; }
-.brand img { height: 46px; width: auto; }
-.brand span { font: 700 14px/1.05 var(--display); letter-spacing: .06em; text-transform: uppercase; color: var(--navy); border-left: 2px solid var(--line); padding-left: 12px; }
+.brand-mark { width: 50px; height: 50px; flex: none; }
+.brand-text { display: flex; flex-direction: column; gap: 3px; }
+.brand-text strong { font: 800 italic 30px/0.9 var(--display); letter-spacing: .01em; text-transform: uppercase; color: var(--blue); }
+.brand-text strong em { font-style: inherit; color: var(--navy); }
+.brand-text small { font: 700 12px/1 var(--display); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.brand-light .brand-text strong { color: #8EC2FF; }
+.brand-light .brand-text strong em { color: #fff; }
+.brand-light .brand-text small { color: #A9BBDD; }
 .nav { display: flex; gap: 28px; margin-left: auto; }
 .nav a { position: relative; font: 600 19px/1 var(--display); letter-spacing: .05em; text-transform: uppercase; color: var(--navy); text-decoration: none; padding: 8px 0; }
 .nav a::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 3px; border-radius: 3px; background: var(--blue); transform: scaleX(0); transition: transform .2s ease; }
@@ -200,7 +206,7 @@ a.contact-card:hover { border-color: var(--blue); box-shadow: var(--shadow); }
 /* ---------- footer */
 .site-footer { background: #071739; color: #A9BBDD; font-size: 16px; }
 .site-footer .cols { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 48px; padding: 72px 0 48px; }
-.footer-logo img { width: 190px; height: auto; }
+.footer-logo .brand-mark { width: 56px; height: 56px; }
 .footer-tag { margin: 16px 0 10px; font: 700 18px/1.2 var(--display); letter-spacing: .1em; text-transform: uppercase; color: #8EC2FF; }
 .site-footer h3 { color: #fff; font-size: 20px; letter-spacing: .1em; text-transform: uppercase; }
 .site-footer ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 9px; }
@@ -247,8 +253,9 @@ a.contact-card:hover { border-color: var(--blue); box-shadow: var(--shadow); }
   body { font-size: 16px; }
   .topbar span { display: none; }
   .topbar .wrap { justify-content: center; }
-  .brand img { height: 38px; }
-  .brand span { font-size: 12px; }
+  .brand-mark { width: 42px; height: 42px; }
+  .brand-text strong { font-size: 25px; }
+  .brand-text small { font-size: 10.5px; }
   .hero-photos { height: 360px; }
   .hp-badge { width: 112px; height: 112px; right: 0; }
   .hp-badge strong { font-size: 18px; }

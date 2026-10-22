@@ -1,4 +1,4 @@
-"""Build the Rog Air-Conditioning & Refrigeration static site.
+"""Build the RM Air Solutions static site (formerly Rog Air-Conditioning & Refrigeration).
 
 Run:  python build.py
 Writes the .html pages, sitemap.xml and robots.txt into this folder.
@@ -13,10 +13,10 @@ from urllib.parse import quote
 ROOT = Path(__file__).parent
 
 CONFIG = {
-    "name": "Rog",
-    "legal_name": "Rog Air-Conditioning & Refrigeration",
+    "name": "RM Air Solutions",
+    "legal_name": "RM Air Solutions",
     "tagline": "Cool comfort. Fresh solutions.",
-    "domain": "https://rogaircon.co.za",
+    "domain": "https://rmairsolutions.co.za",
     # --- Contact details ------------------------------------------------
     "phone_display": "073 578 2677",
     "phone_intl": "27735782677",       # no +, no spaces
@@ -28,7 +28,7 @@ CONFIG = {
     "locality": "Chatsworth",
     "region": "KwaZulu-Natal",
     "area": "Durban & surrounds",
-    "asset_version": "1",
+    "asset_version": "2",
 }
 
 C = CONFIG
@@ -60,6 +60,16 @@ WHY = [
     ("wallet", "Affordable prices", "Clear quotes before any work starts."),
     ("leaf", "Energy-efficient solutions", "Well-serviced equipment uses less power."),
 ]
+
+BRAND_MARK = (
+    '<svg class="brand-mark" viewBox="0 0 48 48" aria-hidden="true">'
+    '<defs><linearGradient id="bm" x1="0" y1="0" x2="1" y2="1">'
+    '<stop offset="0" stop-color="#1E6FE8"/><stop offset="1" stop-color="#0A1F4E"/></linearGradient></defs>'
+    '<circle cx="24" cy="24" r="23" fill="url(#bm)"/>'
+    '<g stroke="#fff" stroke-width="2.6" stroke-linecap="round" fill="none">'
+    '<path d="M24 9v30M11 16.5l26 15M11 31.5l26-15"/>'
+    '<path d="m19.5 11.5 4.5 3.5 4.5-3.5M19.5 36.5l4.5-3.5 4.5 3.5"/></g></svg>'
+)
 
 C = CONFIG
 
@@ -100,7 +110,7 @@ def tel():
     return f"tel:+{C['phone_intl']}"
 
 
-def wa(msg="Hi Rog, I'd like a quote."):
+def wa(msg="Hi RM Air Solutions, I'd like a quote."):
     return f"https://wa.me/{C['whatsapp_intl']}?text={quote(msg)}"
 
 
@@ -133,11 +143,11 @@ def schema():
         "@context": "https://schema.org",
         "@type": "HVACBusiness",
         "name": C["legal_name"],
-        "alternateName": "Rog Aircon",
+        "alternateName": "RM Air Solutions Air-Conditioning & Refrigeration",
         "slogan": C["tagline"],
         "description": "Commercial air-conditioning and refrigeration in Durban: installation, repairs and servicing of cold rooms, bottle coolers, display fridges, underbar fridges, refrigeration units and split units.",
         "url": C["domain"] + "/",
-        "logo": C["domain"] + "/assets/img/rog-logo.png",
+        "logo": C["domain"] + "/assets/img/rm-logo-512.png",
         "image": C["domain"] + "/assets/img/samsung-condensers-on-stands.webp",
         "telephone": "+" + C["phone_intl"],
         "address": {
@@ -199,8 +209,8 @@ def page(slug, title, description, body, home=False):
 <header class="site-header">
   <div class="wrap">
     <a class="brand" href="index.html" aria-label="{C['legal_name']}, home">
-      <img src="assets/img/rog-logo.webp" alt="" width="1525" height="489">
-      <span>Air-Conditioning<br>&amp; Refrigeration</span>
+      {BRAND_MARK}
+      <span class="brand-text"><strong>RM <em>Air Solutions</em></strong><small>Air-conditioning &amp; refrigeration</small></span>
     </a>
     <button class="menu-toggle" aria-expanded="false" aria-controls="nav" aria-label="Menu">{ICON['menu']}</button>
     <nav class="nav" id="nav" aria-label="Main">{nav}</nav>
@@ -214,7 +224,7 @@ def page(slug, title, description, body, home=False):
   <div class="wrap">
     <div class="cols">
       <div>
-        <a class="footer-logo" href="index.html"><img src="assets/img/rog-logo-white.webp" alt="{C['legal_name']}" width="1525" height="489" loading="lazy"></a>
+        <a class="brand brand-light footer-logo" href="index.html" aria-label="{C['legal_name']}, home">{BRAND_MARK}<span class="brand-text"><strong>RM <em>Air Solutions</em></strong><small>Air-conditioning &amp; refrigeration</small></span></a>
         <p class="footer-tag">{escape(C['tagline'])}</p>
         <p>Installation, repairs and servicing of commercial refrigeration and air-conditioning across Durban.</p>
       </div>
@@ -231,7 +241,7 @@ def page(slug, title, description, body, home=False):
       <div>
         <h3>Contact</h3>
         <ul>
-          <li><a href="about.html">About Rog</a></li>
+          <li><a href="about.html">About us</a></li>
           <li><a href="{tel()}">{escape(C['phone_display'])}</a></li>
           <li><a href="{wa()}" target="_blank" rel="noopener">WhatsApp</a></li>
           {email_li}
@@ -246,8 +256,8 @@ def page(slug, title, description, body, home=False):
   </div>
 </footer>
 <div class="float">
-  <a class="f-wa" href="{wa()}" target="_blank" rel="noopener" aria-label="WhatsApp Rog">{ICON['wa']}</a>
-  <a class="f-call" href="{tel()}" aria-label="Call Rog">{ICON['phone']}</a>
+  <a class="f-wa" href="{wa()}" target="_blank" rel="noopener" aria-label="WhatsApp RM Air Solutions">{ICON['wa']}</a>
+  <a class="f-call" href="{tel()}" aria-label="Call RM Air Solutions">{ICON['phone']}</a>
 </div>
 <script src="assets/js/main.js?v={v}" defer></script>
 </body>
@@ -286,7 +296,7 @@ def sectors_section():
     return f"""<section class="section section-dark" id="why">
   <div class="wrap why-grid">
     <div>
-      {head("Why choose Rog?", "Quality service you can trust")}
+      {head("Why choose RM Air Solutions?", "Quality service you can trust")}
       <ul class="why">{why}</ul>
     </div>
     <div class="sectors reveal">
@@ -407,7 +417,7 @@ def refrigeration():
       <h2>Cold rooms that hold their temperature</h2>
       <p>For butcheries, restaurants, supermarkets and warehouses, where a cold room that won&rsquo;t hold temperature quickly turns into lost stock.</p>
       {checks(["Room not reaching or holding temperature", "Evaporators icing up, or defrost problems", "Condensing unit faults and gas leaks", "Fans, controllers, door seals and heaters"])}
-      <a class="btn btn-primary" href="{wa('Hi Rog, our cold room / freezer room needs attention.')}" target="_blank" rel="noopener">Report a cold room fault</a>
+      <a class="btn btn-primary" href="{wa('Hi RM Air Solutions, our cold room / freezer room needs attention.')}" target="_blank" rel="noopener">Report a cold room fault</a>
     </div>
     <img class="reveal" src="assets/img/samsung-condensers-on-stands.webp" alt="Commercial outdoor units installed on steel stands" loading="lazy">
   </div>
@@ -420,7 +430,7 @@ def refrigeration():
       <h2>Bottle coolers, display fridges and underbar fridges</h2>
       <p>The fridges your customers buy from. A warm cooler means lost sales, so we fix them fast.</p>
       {checks(["Single- and double-door glass bottle coolers", "Deli counters, meat displays and multidecks", "Underbar and back-bar counter fridges", "Pharmacy and medical display fridges"])}
-      <a class="btn btn-primary" href="{wa('Hi Rog, my cooler / display fridge needs a repair.')}" target="_blank" rel="noopener">Report a fridge fault</a>
+      <a class="btn btn-primary" href="{wa('Hi RM Air Solutions, my cooler / display fridge needs a repair.')}" target="_blank" rel="noopener">Report a fridge fault</a>
     </div>
     <img class="reveal" src="assets/img/deli-display-counter.webp" alt="Curved-glass deli display counter" loading="lazy">
   </div>
@@ -497,7 +507,7 @@ def aircon():
       <h2>New air-conditioning, installed properly</h2>
       <p>We help you choose the right size of unit for the space, then install it neatly and safely. If you&rsquo;ve already bought a unit, we&rsquo;ll install that one.</p>
       {checks(["Help choosing the right size for the room", "Indoor and outdoor units mounted on proper brackets or stands", "Copper piping, drainage and electrical done neatly", "System vacuumed, gassed and tested before handover"])}
-      <a class="btn btn-primary" href="{wa('Hi Rog, I would like a quote to install air-conditioning.')}" target="_blank" rel="noopener">Get an installation quote</a>
+      <a class="btn btn-primary" href="{wa('Hi RM Air Solutions, I would like a quote to install air-conditioning.')}" target="_blank" rel="noopener">Get an installation quote</a>
     </div>
     <img class="reveal" src="assets/img/condenser-install-vacuum-pump.webp" alt="Outdoor unit installation with vacuum pump connected" loading="lazy">
   </div>
@@ -510,7 +520,7 @@ def aircon():
       <h2>Aircon repairs for all makes and models</h2>
       <p>Tell us what the unit is doing. If it shows an error code, send us a photo of the display.</p>
       {checks(["Blowing warm air or not cooling", "Water leaking from the indoor unit", "Won&rsquo;t switch on, or trips the power", "Error codes, noisy fans and compressor faults", "Gas leaks found and repaired"])}
-      <a class="btn btn-primary" href="{wa('Hi Rog, my aircon needs a repair.')}" target="_blank" rel="noopener">Report an aircon fault</a>
+      <a class="btn btn-primary" href="{wa('Hi RM Air Solutions, my aircon needs a repair.')}" target="_blank" rel="noopener">Report an aircon fault</a>
     </div>
     <img class="reveal" src="assets/img/condenser-pcb-repair.webp" alt="Outdoor unit opened for a repair" loading="lazy">
   </div>
@@ -523,7 +533,7 @@ def aircon():
       <h2>Servicing that keeps the cold air coming</h2>
       <p>In Durban&rsquo;s heat and humidity, a dirty aircon cools poorly and costs more to run. A service gets it back to full performance.</p>
       {checks(["Filters, indoor coil and fan cleaned", "Outdoor unit cleaned and checked", "Drain line cleared so water doesn&rsquo;t drip inside", "Gas pressure checked and topped up where needed"])}
-      <a class="btn btn-primary" href="{wa('Hi Rog, I would like to book an aircon service.')}" target="_blank" rel="noopener">Book a service</a>
+      <a class="btn btn-primary" href="{wa('Hi RM Air Solutions, I would like to book an aircon service.')}" target="_blank" rel="noopener">Book a service</a>
     </div>
     <img class="reveal" src="assets/img/split-unit-wall-bracket.webp" alt="Split unit outdoor condenser mounted on a wall bracket" loading="lazy">
   </div>
@@ -560,12 +570,12 @@ def about():
 <section class="page-hero">
   <div class="wrap">
     <div>
-      <p class="label">{ICON['snow']}About Rog</p>
+      <p class="label">{ICON['snow']}About us</p>
       <h1>Durban&rsquo;s commercial cooling specialists, based in Chatsworth</h1>
-      <p class="lede">Rog Air-Conditioning &amp; Refrigeration installs, repairs and services the cooling equipment that businesses depend on, from a single bottle cooler to a full cold room.</p>
+      <p class="lede">RM Air Solutions installs, repairs and services the cooling equipment that businesses depend on, from a single bottle cooler to a full cold room.</p>
       {call_btns()}
     </div>
-    <img src="assets/img/condenser-install-vacuum-pump.webp" alt="Rog technician's equipment set up for an outdoor unit installation" width="900" height="1200" fetchpriority="high">
+    <img src="assets/img/condenser-install-vacuum-pump.webp" alt="RM Air Solutions technician's equipment set up for an outdoor unit installation" width="900" height="1200" fetchpriority="high">
   </div>
 </section>
 
@@ -575,7 +585,7 @@ def about():
       <p class="label">{ICON['snow']}Who we are</p>
       <h2>Cool comfort. Fresh solutions.</h2>
       <p>We&rsquo;re a Durban air-conditioning and refrigeration business working out of Kharwastan, Chatsworth. Our focus is <strong>commercial work</strong>: the cold rooms, coolers, display fridges and air-conditioners that keep shops, restaurants, supermarkets and offices running.</p>
-      <p>When a fridge full of stock stops cooling, or an office aircon packs up in the middle of a Durban summer, you need someone who answers the phone, turns up and fixes it properly. That&rsquo;s the service we&rsquo;ve built Rog around.</p>
+      <p>When a fridge full of stock stops cooling, or an office aircon packs up in the middle of a Durban summer, you need someone who answers the phone, turns up and fixes it properly. That&rsquo;s the service we&rsquo;ve built RM Air Solutions around.</p>
       <p>We also look after homes, so the same technicians who keep a supermarket&rsquo;s cold room running can install or service the aircon in your house.</p>
     </div>
     <img class="reveal" src="assets/img/outdoor-units-commercial-building.webp" alt="Outdoor air-conditioning units installed on a commercial building" loading="lazy">
@@ -607,7 +617,7 @@ def about():
 {cta_band()}
 """
     return page("about.html", f"About Us | {C['legal_name']}",
-                "Rog Air-Conditioning & Refrigeration is a commercial cooling specialist based in Kharwastan, Chatsworth, installing, repairing and servicing refrigeration and air-conditioning across Durban.",
+                "RM Air Solutions is a commercial cooling specialist based in Kharwastan, Chatsworth, installing, repairing and servicing refrigeration and air-conditioning across Durban.",
                 body)
 
 
@@ -657,11 +667,11 @@ def contact():
 </section>
 
 <section class="map-wrap">
-  <iframe title="Map showing Rog in Kharwastan, Chatsworth" src="https://maps.google.com/maps?q={map_q}&z=15&output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+  <iframe title="Map showing RM Air Solutions in Kharwastan, Chatsworth" src="https://maps.google.com/maps?q={map_q}&z=15&output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
 </section>
 """
     return page("contact.html", f"Contact & Quotes | {C['legal_name']}",
-                "Call or WhatsApp Rog on 073 578 2677 for commercial refrigeration and air-conditioning quotes in Durban. Based at 84 Erica Avenue, Kharwastan, Chatsworth.",
+                "Call or WhatsApp RM Air Solutions on 073 578 2677 for commercial refrigeration and air-conditioning quotes in Durban. Based at 84 Erica Avenue, Kharwastan, Chatsworth.",
                 body)
 
 
