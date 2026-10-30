@@ -248,6 +248,26 @@ a.contact-card:hover { border-color: var(--blue); box-shadow: var(--shadow); }
 .chips-plain li { font-weight: 500; background: var(--frost); }
 .more-link { margin: 22px 0 0; }
 
+
+/* ---------- blog */
+.post-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+.post-card { display: flex; flex-direction: column; overflow: hidden; border: 1px solid var(--line); border-radius: var(--radius); background: #fff; color: var(--text); text-decoration: none; transition: transform .2s ease, box-shadow .2s ease; }
+.post-card:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
+.post-card img { width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; }
+.post-card > div { display: flex; flex-direction: column; flex: 1; padding: 22px; }
+.post-card time { font: 700 13px/1 var(--display); letter-spacing: .12em; text-transform: uppercase; color: var(--blue); margin-bottom: 10px; }
+.post-card h3 { font-size: 24px; text-transform: uppercase; }
+.post-card p { flex: 1; font-size: 15.5px; }
+.post-hero .wrap { padding-bottom: 56px; }
+.post-hero h1 { max-width: 20em; }
+.post { padding-top: 0; }
+.post-img { width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; border-radius: var(--radius); margin: -40px 0 36px; box-shadow: var(--shadow); position: relative; }
+.post-body h2 { font-size: clamp(26px, 3vw, 34px); margin: 36px 0 14px; }
+.post-body p { font-size: 18px; }
+.post-body .checks { margin: 6px 0 22px; }
+.post-cta { margin-top: 40px; }
+.post-cta h3 { font-size: 28px; text-transform: uppercase; }
+
 /* ---------- responsive */
 .nav a, .brand-text strong { white-space: nowrap; }
 @media (max-width: 1240px) {
@@ -270,6 +290,7 @@ a.contact-card:hover { border-color: var(--blue); box-shadow: var(--shadow); }
   .equip-grid, .gallery { grid-template-columns: 1fr 1fr; }
   .site-footer .cols { grid-template-columns: 1fr 1fr; }
   .link-cards { grid-template-columns: 1fr 1fr; }
+  .post-cards { grid-template-columns: 1fr 1fr; }
   .site-footer .cols > :first-child { grid-column: 1 / -1; }
   .cta-band .wrap { flex-direction: column; align-items: flex-start; }
   .section { padding: 72px 0; }
@@ -285,7 +306,8 @@ a.contact-card:hover { border-color: var(--blue); box-shadow: var(--shadow); }
   .hp-badge { width: 112px; height: 112px; right: 0; }
   .hp-badge strong { font-size: 18px; }
   .hp-badge span { font-size: 13px; }
-  .equip-grid, .why, .field-row, .site-footer .cols, .link-cards { grid-template-columns: 1fr; }
+  .equip-grid, .why, .field-row, .site-footer .cols, .link-cards, .post-cards { grid-template-columns: 1fr; }
+  .post-img { margin-top: -24px; }
   .gallery { gap: 10px; }
   .gallery figcaption { font-size: 12px; left: 8px; bottom: 8px; padding: 6px 9px; }
   .btns .btn { width: 100%; }

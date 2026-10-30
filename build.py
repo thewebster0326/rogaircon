@@ -10,6 +10,7 @@ from html import escape
 from pathlib import Path
 from urllib.parse import quote
 
+from blog_content import POSTS
 from landing_content import AREAS, SERVICES
 
 ROOT = Path(__file__).parent
@@ -30,7 +31,7 @@ CONFIG = {
     "locality": "Chatsworth",
     "region": "KwaZulu-Natal",
     "area": "Durban & surrounds",
-    "asset_version": "4",
+    "asset_version": "6",
 }
 
 C = CONFIG
@@ -136,8 +137,8 @@ def checks(items):
 
 
 # ---------------------------------------------------------------- layout
-NAV = [("index.html", "Home"), ("commercial-refrigeration.html", "Refrigeration"),
-       ("air-conditioning.html", "Air-conditioning"), ("areas.html", "Areas"), ("about.html", "About"),
+NAV = [("commercial-refrigeration.html", "Refrigeration"),
+       ("air-conditioning.html", "Air-conditioning"), ("areas.html", "Areas"), ("blog.html", "Blog"), ("about.html", "About"),
        ("contact.html", "Contact")]
 
 
@@ -171,7 +172,7 @@ def schema():
     return json.dumps(data, ensure_ascii=False)
 
 
-def page(slug, title, description, body, home=False, ld=None):
+def page(slug, title, description, body, home=False, ld=None, og_image="assets/img/og-image.jpg", og_type="website"):
     v = C["asset_version"]
     current = ' aria-current="page"'
     nav = "".join(
@@ -188,11 +189,11 @@ def page(slug, title, description, body, home=False, ld=None):
 <title>{escape(title)}</title>
 <meta name="description" content="{escape(description)}">
 <link rel="canonical" href="{canonical}">
-<meta property="og:type" content="website">
+<meta property="og:type" content="{og_type}">
 <meta property="og:title" content="{escape(title)}">
 <meta property="og:description" content="{escape(description)}">
 <meta property="og:url" content="{canonical}">
-<meta property="og:image" content="{C['domain']}/assets/img/og-image.jpg">
+<meta property="og:image" content="{C['domain']}/{og_image}">
 <meta name="theme-color" content="#0A1F4E">
 <link rel="icon" href="assets/img/favicon.png" type="image/png">
 <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
@@ -251,6 +252,7 @@ def page(slug, title, description, body, home=False, ld=None):
         <h3>Contact</h3>
         <ul>
           <li><a href="about.html">About us</a></li>
+          <li><a href="blog.html">Blog</a></li>
           <li><a href="{tel()}">{escape(C['phone_display'])}</a></li>
           <li><a href="{wa()}" target="_blank" rel="noopener">WhatsApp</a></li>
           {email_li}
@@ -466,6 +468,8 @@ def service_page(sv):
   </div>
 </section>
 
+{(lambda ps: f'<section class="section section-alt"><div class="wrap">{head("From the blog", "Read more")}{post_cards(ps)}</div></section>' if ps else '')([q for q in POSTS if sv["slug"] in q["related"]])}
+
 {cta_band()}
 """
     service_ld = {"@context": "https://schema.org", "@type": "Service", "name": sv["name"],
@@ -584,6 +588,123 @@ def areas_hub():
                 body, ld=[crumbs_ld(trail)])
 
 
+# ---------------------------------------------------------------- blog
+POST = {p["slug"]: p for p in POSTS}
+
+
+def nice_date(iso):
+    y, m, d = iso.split("-")
+    months = ["January", "February", "March", "April", "May", "June", "July", "August",
+              "September", "October", "November", "December"]
+    return f"{int(d)} {months[int(m) - 1]} {y}"
+
+
+def post_cards(posts):
+    cards = "".join(
+        f'''<a class="post-card reveal" href="{p["slug"]}">
+      <img src="assets/img/{p["img"]}.webp" alt="{escape(p["img_alt"])}" loading="lazy" width="1400" height="788">
+      <div><time datetime="{p["date"]}">{nice_date(p["date"])}</time><h3>{escape(p["title"])}</h3>
+      <p>{escape(p["excerpt"])}</p><span class="more">Read article {ICON["arrow"]}</span></div></a>'''
+        for p in posts)
+    return f'<div class="post-cards">{cards}</div>'
+
+
+def blog_section(alt=False, limit=3):
+    return f"""<section class="section {'section-alt' if alt else ''}">
+  <div class="wrap">
+    {head("From the blog", "Advice for keeping things cold")}
+    {post_cards(POSTS[:limit])}
+    <p class="more-link"><a class="more" href="blog.html">All articles {ICON['arrow']}</a></p>
+  </div>
+</section>"""
+
+
+def blog_index():
+    trail = [("index.html", "Home"), ("blog.html", "Blog")]
+    body = f"""
+<section class="page-hero page-hero-plain">
+  <div class="wrap">
+    <div>
+      {crumbs(trail)}
+      <p class="label">{ICON['snow']}Blog</p>
+      <h1>Aircon &amp; refrigeration advice</h1>
+      <p class="lede">Practical guides from our technicians for Durban businesses and homes: what goes wrong with fridges, cold rooms and aircons, what you can check yourself, and when to call us.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    {post_cards(POSTS)}
+  </div>
+</section>
+
+{cta_band()}
+"""
+    ld = {"@context": "https://schema.org", "@type": "Blog", "name": C["legal_name"] + " blog",
+          "url": C["domain"] + "/blog.html", "publisher": provider_ld(),
+          "blogPost": [{"@type": "BlogPosting", "headline": p["title"], "url": C["domain"] + "/" + p["slug"],
+                        "datePublished": p["date"]} for p in POSTS]}
+    return page("blog.html", "Aircon & Refrigeration Advice Blog | RM Air Solutions",
+                "Practical aircon and commercial refrigeration advice for Durban businesses and homes, from the technicians at RM Air Solutions.",
+                body, ld=[ld, crumbs_ld(trail)])
+
+
+def blog_post(p):
+    trail = [("index.html", "Home"), ("blog.html", "Blog"), (p["slug"], p["title"])]
+    parts = []
+    for h, paras, items in p["sections"]:
+        parts.append(f"<h2>{escape(h)}</h2>" + "".join(f"<p>{escape(x)}</p>" for x in paras))
+        if items:
+            parts.append(checks([escape(x) for x in items]))
+    others = [q for q in POSTS if q["slug"] != p["slug"]][:3]
+    related = [x for x in p["related"] if x in SVC]
+    body = f"""
+<section class="page-hero page-hero-plain post-hero">
+  <div class="wrap">
+    <div>
+      {crumbs(trail)}
+      <p class="label">{ICON['snow']}Blog &middot; <time datetime="{p['date']}">{nice_date(p['date'])}</time></p>
+      <h1>{escape(p['title'])}</h1>
+      <p class="lede">{escape(p['excerpt'])}</p>
+    </div>
+  </div>
+</section>
+
+<article class="section post">
+  <div class="wrap narrow">
+    <img class="post-img" src="assets/img/{p['img']}.webp" alt="{escape(p['img_alt'])}" width="1400" height="788" fetchpriority="high">
+    <div class="post-body">{"".join(parts)}</div>
+    <aside class="post-cta panel">
+      <h3>Need it sorted?</h3>
+      <p>Call or WhatsApp {escape(C['phone_display'])} with a photo of the unit and what it&rsquo;s doing. We work across Durban from our base in Chatsworth.</p>
+      {call_btns()}
+    </aside>
+  </div>
+</article>
+
+{f'<section class="section section-alt"><div class="wrap">{head("Related services", "How we can help")}{link_cards(related)}</div></section>' if related else ''}
+
+<section class="section">
+  <div class="wrap">
+    {head("More articles", "Keep reading")}
+    {post_cards(others)}
+  </div>
+</section>
+
+{cta_band()}
+"""
+    ld = {"@context": "https://schema.org", "@type": "BlogPosting", "headline": p["title"],
+          "description": p["desc"], "datePublished": p["date"], "dateModified": p["date"],
+          "image": C["domain"] + "/assets/img/" + p["img"] + ".webp",
+          "url": C["domain"] + "/" + p["slug"], "mainEntityOfPage": C["domain"] + "/" + p["slug"],
+          "author": {"@type": "Organization", "name": C["legal_name"], "url": C["domain"] + "/"},
+          "publisher": {"@type": "Organization", "name": C["legal_name"],
+                        "logo": {"@type": "ImageObject", "url": C["domain"] + "/assets/img/rm-logo-512.png"}}}
+    return page(p["slug"], p["meta_title"], p["desc"], body, ld=[ld, crumbs_ld(trail)],
+                og_image="assets/img/" + p["img"] + ".webp", og_type="article")
+
+
 # ---------------------------------------------------------------- pages
 
 def home():
@@ -652,6 +773,8 @@ def home():
     ])}
   </div>
 </section>
+
+{blog_section()}
 
 <section class="section section-alt">
   <div class="wrap">
@@ -983,6 +1106,8 @@ PAGES = {
 }
 PAGES.update({x["slug"]: (lambda x=x: service_page(x)) for x in SERVICES})
 PAGES.update({x["slug"]: (lambda x=x: area_page(x)) for x in AREAS})
+PAGES["blog.html"] = blog_index
+PAGES.update({x["slug"]: (lambda x=x: blog_post(x)) for x in POSTS})
 
 
 def main():
