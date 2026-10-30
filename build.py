@@ -10,6 +10,8 @@ from html import escape
 from pathlib import Path
 from urllib.parse import quote
 
+from landing_content import AREAS, SERVICES
+
 ROOT = Path(__file__).parent
 
 CONFIG = {
@@ -28,7 +30,7 @@ CONFIG = {
     "locality": "Chatsworth",
     "region": "KwaZulu-Natal",
     "area": "Durban & surrounds",
-    "asset_version": "2",
+    "asset_version": "4",
 }
 
 C = CONFIG
@@ -135,13 +137,15 @@ def checks(items):
 
 # ---------------------------------------------------------------- layout
 NAV = [("index.html", "Home"), ("commercial-refrigeration.html", "Refrigeration"),
-       ("air-conditioning.html", "Air-conditioning"), ("about.html", "About"), ("contact.html", "Contact")]
+       ("air-conditioning.html", "Air-conditioning"), ("areas.html", "Areas"), ("about.html", "About"),
+       ("contact.html", "Contact")]
 
 
 def schema():
     data = {
         "@context": "https://schema.org",
         "@type": "HVACBusiness",
+        "@id": C["domain"] + "/#business",
         "name": C["legal_name"],
         "alternateName": "RM Air Solutions Air-Conditioning & Refrigeration",
         "slogan": C["tagline"],
@@ -157,7 +161,8 @@ def schema():
             "addressRegion": C["region"],
             "addressCountry": "ZA",
         },
-        "areaServed": [{"@type": "City", "name": "Durban"}, {"@type": "Place", "name": "Chatsworth"}],
+        "areaServed": [{"@type": "City", "name": "Durban"}] + [
+            {"@type": "Place", "name": a["name"]} for a in AREAS],
         "knowsAbout": ["Commercial refrigeration", "Cold rooms", "Bottle coolers", "Display fridges",
                        "Underbar counter fridges", "Air-conditioning installation", "Air-conditioning repairs"],
     }
@@ -166,7 +171,7 @@ def schema():
     return json.dumps(data, ensure_ascii=False)
 
 
-def page(slug, title, description, body, home=False):
+def page(slug, title, description, body, home=False, ld=None):
     v = C["asset_version"]
     current = ' aria-current="page"'
     nav = "".join(
@@ -197,6 +202,7 @@ def page(slug, title, description, body, home=False):
 <link rel="stylesheet" href="assets/css/styles.css?v={v}">
 <script>document.documentElement.classList.add('js')</script>
 {'<script type="application/ld+json">' + schema() + '</script>' if home else ''}
+{''.join('<script type="application/ld+json">' + json.dumps(d, ensure_ascii=False) + '</script>' for d in (ld or []))}
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -231,11 +237,14 @@ def page(slug, title, description, body, home=False):
       <div>
         <h3>Services</h3>
         <ul>
-          <li><a href="commercial-refrigeration.html#cold-rooms">Cold rooms &amp; freezer rooms</a></li>
-          <li><a href="commercial-refrigeration.html#coolers">Bottle coolers &amp; display fridges</a></li>
-          <li><a href="commercial-refrigeration.html#units">Refrigeration units</a></li>
-          <li><a href="air-conditioning.html#install">Aircon installation</a></li>
-          <li><a href="air-conditioning.html#repairs">Aircon repairs &amp; servicing</a></li>
+          {''.join(f'<li><a href="{x["slug"]}">{x["short"]}</a></li>' for x in SERVICES)}
+        </ul>
+      </div>
+      <div>
+        <h3>Areas</h3>
+        <ul>
+          {''.join(f'<li><a href="{x["slug"]}">{x["name"]}</a></li>' for x in AREAS)}
+          <li><a href="areas.html">All areas</a></li>
         </ul>
       </div>
       <div>
@@ -314,6 +323,267 @@ def gallery(items):
     return f'<div class="gallery">{figs}</div>'
 
 
+# ---------------------------------------------------------------- landing-page helpers
+SVC = {x["slug"]: x for x in SERVICES}
+HUB = {"refrigeration": ("commercial-refrigeration.html", "Refrigeration"),
+       "aircon": ("air-conditioning.html", "Air-conditioning")}
+
+GALLERY_ALT = {
+    "samsung-condensers-on-stands": "Commercial outdoor condensing units mounted on steel stands",
+    "outdoor-units-commercial-building": "Outdoor air-conditioning units mounted on a commercial building",
+    "condenser-install-vacuum-pump": "Outdoor unit installation with a vacuum pump and gauges connected",
+    "condenser-pcb-repair": "Outdoor unit opened up with its control board exposed during a repair",
+    "bottle-coolers-convenience-store": "Glass-door bottle coolers stocked with drinks in a shop",
+    "pharmacy-display-fridge": "Upright glass-door display fridge in a pharmacy",
+    "split-unit-wall-bracket": "Split-unit outdoor condenser mounted on a wall bracket",
+    "bottle-cooler-repair": "Bottle cooler with the base panel off and tools laid out for a repair",
+    "deli-display-counter": "Curved-glass deli display counter",
+    "double-door-glass-cooler": "Double-door glass-front commercial cooler",
+}
+
+
+def crumbs(trail):
+    """trail: [(href, label), ...]; the last item is the current page."""
+    items = "".join(
+        f'<li><a href="{h}">{escape(l)}</a></li>' if i < len(trail) - 1 else f'<li aria-current="page">{escape(l)}</li>'
+        for i, (h, l) in enumerate(trail))
+    return f'<nav class="crumbs" aria-label="Breadcrumb"><ol>{items}</ol></nav>'
+
+
+def crumbs_ld(trail):
+    return {"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [
+        {"@type": "ListItem", "position": i + 1, "name": l,
+         "item": C["domain"] + "/" + ("" if h == "index.html" else h)}
+        for i, (h, l) in enumerate(trail)]}
+
+
+def faq_html(faqs, heading):
+    items = "".join(f"<details><summary>{escape(q)}</summary><p>{escape(a)}</p></details>" for q, a in faqs)
+    return f"""<section class="section section-alt">
+  <div class="wrap">
+    <div class="section-head reveal"><p class="label">{ICON['snow']}Questions</p><h2>{heading}</h2></div>
+    <div class="faq">{items}</div>
+  </div>
+</section>"""
+
+
+def faq_ld(faqs):
+    return {"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [
+        {"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}} for q, a in faqs]}
+
+
+def provider_ld():
+    return {"@id": C["domain"] + "/#business", "@type": "HVACBusiness", "name": C["legal_name"],
+            "telephone": "+" + C["phone_intl"], "url": C["domain"] + "/"}
+
+
+def link_cards(slugs):
+    cards = "".join(
+        f'<a class="link-card reveal" href="{x["slug"]}"><h3>{x["name"]}</h3>'
+        f'<p>{escape(x["lede"])}</p><span class="more">{x["short"]} {ICON["arrow"]}</span></a>'
+        for x in (SVC[s] for s in slugs))
+    return f'<div class="link-cards">{cards}</div>'
+
+
+def area_chips(exclude=None):
+    return '<ul class="chips">' + "".join(
+        f'<li><a href="{a["slug"]}">{ICON["pin"]}{a["name"]}</a></li>' for a in AREAS if a["slug"] != exclude) + "</ul>"
+
+
+def services_index_section(title="Our services", heading="Find the service you need", alt=False, kind=None):
+    slugs = [x["slug"] for x in SERVICES if kind in (None, x["kind"])]
+    return f"""<section class="section {'section-alt' if alt else ''}">
+  <div class="wrap">
+    {head(title, heading)}
+    {link_cards(slugs)}
+  </div>
+</section>"""
+
+
+PROCESS = """<ol class="steps">
+      <li class="reveal"><h3>Send us the details</h3><p>Call or WhatsApp with the make, what the equipment is doing, and a photo of the unit, its sticker or the error code.</p></li>
+      <li class="reveal"><h3>Get your quote</h3><p>We quote for the work, or come out first if the fault has to be found on site.</p></li>
+      <li class="reveal"><h3>Fixed and tested</h3><p>We do the work and test that the equipment is cooling properly before we leave.</p></li>
+    </ol>"""
+
+
+def service_page(sv):
+    hub_href, hub_label = HUB[sv["kind"]]
+    trail = [("index.html", "Home"), (hub_href, hub_label), (sv["slug"], sv["short"])]
+    intro = "".join(f"<p>{escape(p)}</p>" for p in sv["intro"])
+    body = f"""
+<section class="page-hero">
+  <div class="wrap">
+    <div>
+      {crumbs(trail)}
+      <p class="label">{ICON['snow']}{hub_label} &middot; Durban</p>
+      <h1>{escape(sv['h1'])}</h1>
+      <p class="lede">{escape(sv['lede'])}</p>
+      <div class="btns">
+        <a class="btn btn-primary" href="{tel()}">{ICON['phone']}Call {escape(C['phone_display'])}</a>
+        <a class="btn btn-wa" href="{wa(sv['wa'])}" target="_blank" rel="noopener">{ICON['wa']}WhatsApp us</a>
+      </div>
+    </div>
+    <img src="assets/img/{sv['img']}.webp" alt="{escape(sv['img_alt'])}" fetchpriority="high">
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap narrow reveal">
+    <p class="label">{ICON['snow']}{escape(sv['name'])}</p>
+    <h2>How we approach it</h2>
+    {intro}
+  </div>
+</section>
+
+<section class="section section-alt">
+  <div class="wrap two-col">
+    <div class="panel reveal"><h3>Signs you need us</h3>{checks([escape(x) for x in sv['signs']])}</div>
+    <div class="panel reveal"><h3>What we repair</h3>{checks([escape(x) for x in sv['work']])}</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    {head("How it works", "From your message to a working unit")}
+    {PROCESS}
+  </div>
+</section>
+
+<section class="section section-alt">
+  <div class="wrap">
+    {head("Where we work", escape(sv['short']) + " across Durban", "Based in Chatsworth and working across Durban and the surrounding areas.")}
+    {area_chips()}
+  </div>
+</section>
+
+{faq_html(sv['faqs'], escape(sv['short']) + ": common questions")}
+
+<section class="section">
+  <div class="wrap">
+    {head("Related services", "We can also help with")}
+    {link_cards(sv['related'])}
+  </div>
+</section>
+
+{cta_band()}
+"""
+    service_ld = {"@context": "https://schema.org", "@type": "Service", "name": sv["name"],
+                  "serviceType": sv["name"], "description": sv["desc"],
+                  "url": C["domain"] + "/" + sv["slug"], "provider": provider_ld(),
+                  "areaServed": [{"@type": "City", "name": "Durban"}] + [{"@type": "Place", "name": a["name"]} for a in AREAS]}
+    return page(sv["slug"], sv["title"], sv["desc"], body,
+                ld=[service_ld, crumbs_ld(trail), faq_ld(sv["faqs"])])
+
+
+def area_page(ar):
+    trail = [("index.html", "Home"), ("areas.html", "Areas"), (ar["slug"], ar["name"])]
+    intro = "".join(f"<p>{escape(p)}</p>" for p in ar["intro"])
+    figs = "".join(
+        f'<figure class="reveal"><img src="assets/img/{g}.webp" alt="{escape(GALLERY_ALT.get(g, ""))}" loading="lazy"></figure>'
+        for g in ar["gallery"])
+    suburbs = '<ul class="chips chips-plain">' + "".join(f"<li>{escape(x)}</li>" for x in ar["suburbs"]) + "</ul>"
+    body = f"""
+<section class="page-hero">
+  <div class="wrap">
+    <div>
+      {crumbs(trail)}
+      <p class="label">{ICON['pin']}Areas we serve &middot; {escape(ar['name'])}</p>
+      <h1>{escape(ar['h1'])}</h1>
+      <p class="lede">{escape(ar['lede'])}</p>
+      {call_btns()}
+    </div>
+    <img src="assets/img/{ar['img']}.webp" alt="{escape(GALLERY_ALT.get(ar['img'], ''))}" fetchpriority="high">
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap split">
+    <div class="reveal">
+      <p class="label">{ICON['snow']}{escape(ar['name'])}</p>
+      <h2>Working in {escape(ar['name'])}</h2>
+      {intro}
+    </div>
+    <div class="panel reveal"><h3>{escape(ar['focus_title'])}</h3>{checks([escape(x) for x in ar['focus']])}</div>
+  </div>
+</section>
+
+<section class="section section-alt">
+  <div class="wrap">
+    {head("Services", "Popular services in " + escape(ar['name']))}
+    {link_cards(ar['services'])}
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap two-col">
+    <div class="panel reveal"><h3>{escape(ar['local_title'])}</h3><p>{escape(ar['local'])}</p></div>
+    <div class="panel reveal"><h3>Suburbs we cover</h3>{suburbs}</div>
+  </div>
+</section>
+
+<section class="section section-alt">
+  <div class="wrap">
+    {head("Our work", "Recent jobs around Durban")}
+    <div class="gallery">{figs}</div>
+  </div>
+</section>
+
+{faq_html(ar['faqs'], escape(ar['name']) + ": common questions")}
+
+<section class="section">
+  <div class="wrap">
+    {head("Other areas", "We also work in")}
+    {area_chips(exclude=ar['slug'])}
+  </div>
+</section>
+
+{cta_band()}
+"""
+    local_ld = {"@context": "https://schema.org", "@type": "Service",
+                "name": "Air-conditioning and refrigeration in " + ar["name"],
+                "serviceType": "Commercial refrigeration and air-conditioning repairs",
+                "url": C["domain"] + "/" + ar["slug"], "provider": provider_ld(),
+                "areaServed": {"@type": "Place", "name": ar["name"]}}
+    return page(ar["slug"], ar["title"], ar["desc"], body,
+                ld=[local_ld, crumbs_ld(trail), faq_ld(ar["faqs"])])
+
+
+def areas_hub():
+    trail = [("index.html", "Home"), ("areas.html", "Areas")]
+    cards = "".join(
+        f'<a class="link-card reveal" href="{a["slug"]}"><h3>{ICON["pin"]}{a["name"]}</h3>'
+        f'<p>{escape(a["lede"])}</p><span class="more">{escape(a["name"])} {ICON["arrow"]}</span></a>'
+        for a in AREAS)
+    body = f"""
+<section class="page-hero page-hero-plain">
+  <div class="wrap">
+    <div>
+      {crumbs(trail)}
+      <p class="label">{ICON['pin']}Areas we serve</p>
+      <h1>Aircon &amp; refrigeration across Durban</h1>
+      <p class="lede">We&rsquo;re based in Kharwastan, Chatsworth, and go out to businesses and homes across Durban and the surrounding areas. Choose your area for local details, or call us if yours isn&rsquo;t listed.</p>
+      {call_btns()}
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    {head("Areas", "Where we work")}
+    <div class="link-cards">{cards}</div>
+  </div>
+</section>
+
+{services_index_section(alt=True)}
+
+{cta_band()}
+"""
+    return page("areas.html", "Areas We Serve in Durban | " + C["legal_name"],
+                "RM Air Solutions covers Durban from Chatsworth: Pinetown, Westville, Umhlanga, Durban Central, Queensburgh, Amanzimtoti and South Durban.",
+                body, ld=[crumbs_ld(trail)])
+
+
 # ---------------------------------------------------------------- pages
 
 def home():
@@ -357,9 +627,17 @@ def home():
   </div>
 </section>
 
-{equipment_section()}
+{services_index_section("Services", "Find the service you need", alt=True)}
 
 {sectors_section()}
+
+<section class="section">
+  <div class="wrap">
+    {head("Areas we serve", "Based in Chatsworth, working across Durban")}
+    {area_chips()}
+    <p class="more-link"><a class="more" href="areas.html">All areas {ICON['arrow']}</a></p>
+  </div>
+</section>
 
 <section class="section">
   <div class="wrap">
@@ -389,8 +667,8 @@ def home():
 {cta_band()}
 """
     return page("index.html",
-                f"Commercial Air-Conditioning & Refrigeration in Durban | {C['legal_name']}",
-                "Commercial refrigeration and air-conditioning in Durban, based in Chatsworth. Installation, repairs and servicing of cold rooms, bottle coolers, display fridges and split units.",
+                "Commercial Aircon & Refrigeration Durban | RM Air Solutions",
+                "Commercial refrigeration and air-conditioning in Durban, based in Chatsworth: cold rooms, bottle coolers, display fridges and split units.",
                 body, home=True)
 
 
@@ -410,7 +688,9 @@ def refrigeration():
 
 {equipment_section(alt=False)}
 
-<section class="section section-alt" id="cold-rooms">
+{services_index_section("Refrigeration services", "Choose your equipment", alt=True, kind="refrigeration")}
+
+<section class="section" id="cold-rooms">
   <div class="wrap split">
     <div class="reveal">
       <p class="label">{ICON['snow']}Cold rooms &amp; freezer rooms</p>
@@ -481,7 +761,7 @@ def refrigeration():
 {cta_band("Stock at risk?", "Call now for cold room, cooler and display fridge repairs across Durban.")}
 """
     return page("commercial-refrigeration.html",
-                f"Commercial Refrigeration Repairs & Installation in Durban | {C['name']}",
+                "Commercial Refrigeration Repairs Durban | RM Air Solutions",
                 "Cold room, freezer room, bottle cooler, display fridge and underbar fridge installation, repairs and servicing in Durban. Based in Chatsworth.",
                 body)
 
@@ -500,7 +780,9 @@ def aircon():
   </div>
 </section>
 
-<section class="section" id="install">
+{services_index_section("Aircon services", "Choose a service", kind="aircon")}
+
+<section class="section section-alt" id="install">
   <div class="wrap split">
     <div class="reveal">
       <p class="label">{ICON['snow']}Installation</p>
@@ -554,7 +836,7 @@ def aircon():
 {cta_band("Aircon not cooling?", "WhatsApp a photo of the unit or the error code on the display, and we&rsquo;ll tell you what it needs.")}
 """
     return page("air-conditioning.html",
-                f"Air-Conditioning Installation, Repairs & Servicing in Durban | {C['name']}",
+                "Aircon Installation & Repairs Durban | RM Air Solutions",
                 "Air-conditioning installation, repairs and servicing for offices, shops, restaurants and homes in Durban. Based in Chatsworth. All makes and models.",
                 body)
 
@@ -617,7 +899,7 @@ def about():
 {cta_band()}
 """
     return page("about.html", f"About Us | {C['legal_name']}",
-                "RM Air Solutions is a commercial cooling specialist based in Kharwastan, Chatsworth, installing, repairing and servicing refrigeration and air-conditioning across Durban.",
+                "RM Air Solutions: commercial cooling specialists based in Kharwastan, Chatsworth, servicing refrigeration and aircon across Durban.",
                 body)
 
 
@@ -671,7 +953,7 @@ def contact():
 </section>
 """
     return page("contact.html", f"Contact & Quotes | {C['legal_name']}",
-                "Call or WhatsApp RM Air Solutions on 073 578 2677 for commercial refrigeration and air-conditioning quotes in Durban. Based at 84 Erica Avenue, Kharwastan, Chatsworth.",
+                "Call or WhatsApp RM Air Solutions on 073 578 2677 for commercial refrigeration and aircon quotes in Durban. Based in Kharwastan, Chatsworth.",
                 body)
 
 
@@ -694,10 +976,13 @@ PAGES = {
     "index.html": home,
     "commercial-refrigeration.html": refrigeration,
     "air-conditioning.html": aircon,
+    "areas.html": areas_hub,
     "about.html": about,
     "contact.html": contact,
     "404.html": not_found,
 }
+PAGES.update({x["slug"]: (lambda x=x: service_page(x)) for x in SERVICES})
+PAGES.update({x["slug"]: (lambda x=x: area_page(x)) for x in AREAS})
 
 
 def main():
@@ -717,5 +1002,25 @@ def main():
         print("Note: no email set in CONFIG (hidden on the site).")
 
 
+def similarity_report():
+    """Worst pairwise text similarity between area pages and between service pages."""
+    import re
+    from difflib import SequenceMatcher
+
+    def text(slug):
+        html = (ROOT / slug).read_text(encoding="utf-8")
+        main_ = html.split('<main id="main">')[1].split("</main>")[0]
+        return re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", main_))
+
+    for group, items in (("areas", AREAS), ("services", SERVICES)):
+        texts = {x["slug"]: text(x["slug"]) for x in items}
+        worst = max((SequenceMatcher(None, texts[a], texts[b]).ratio(), a, b)
+                    for i, a in enumerate(texts) for b in list(texts)[i + 1:])
+        print(f"{group}: worst pair {worst[0]:.3f} ({worst[1]} vs {worst[2]})")
+
+
 if __name__ == "__main__":
+    import sys
     main()
+    if "--similarity" in sys.argv:
+        similarity_report()
