@@ -597,3 +597,9 @@ AREAS = [
         ],
     },
 ]
+
+# Second batch (Nov 2026)
+from landing_more import MORE_AREAS, MORE_SERVICES  # noqa: E402
+
+SERVICES += MORE_SERVICES
+AREAS += MORE_AREAS

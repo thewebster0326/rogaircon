@@ -31,7 +31,7 @@ CONFIG = {
     "locality": "Chatsworth",
     "region": "KwaZulu-Natal",
     "area": "Durban & surrounds",
-    "asset_version": "6",
+    "asset_version": "7",
 }
 
 C = CONFIG
@@ -238,7 +238,7 @@ def page(slug, title, description, body, home=False, ld=None, og_image="assets/i
       <div>
         <h3>Services</h3>
         <ul>
-          {''.join(f'<li><a href="{x["slug"]}">{x["short"]}</a></li>' for x in SERVICES)}
+          {''.join(f'<li><a href="{x["slug"]}">{x["short"]}</a></li>' for x in SERVICES if not x.get("group"))}
         </ul>
       </div>
       <div>
@@ -392,8 +392,9 @@ def area_chips(exclude=None):
         f'<li><a href="{a["slug"]}">{ICON["pin"]}{a["name"]}</a></li>' for a in AREAS if a["slug"] != exclude) + "</ul>"
 
 
-def services_index_section(title="Our services", heading="Find the service you need", alt=False, kind=None):
-    slugs = [x["slug"] for x in SERVICES if kind in (None, x["kind"])]
+def services_index_section(title="Our services", heading="Find the service you need", alt=False, kind=None,
+                           groups=(None,)):
+    slugs = [x["slug"] for x in SERVICES if kind in (None, x["kind"]) and x.get("group") in groups]
     return f"""<section class="section {'section-alt' if alt else ''}">
   <div class="wrap">
     {head(title, heading)}
@@ -584,7 +585,7 @@ def areas_hub():
 {cta_band()}
 """
     return page("areas.html", "Areas We Serve in Durban | " + C["legal_name"],
-                "RM Air Solutions covers Durban from Chatsworth: Pinetown, Westville, Umhlanga, Durban Central, Queensburgh, Amanzimtoti and South Durban.",
+                "RM Air Solutions covers Durban from Chatsworth: Phoenix, Umlazi, Pinetown, Westville, Umhlanga, Durban North, the Bluff, Amanzimtoti and more.",
                 body, ld=[crumbs_ld(trail)])
 
 
@@ -750,6 +751,8 @@ def home():
 
 {services_index_section("Services", "Find the service you need", alt=True)}
 
+{services_index_section("Industries", "Refrigeration and aircon for your trade", groups=("industry",))}
+
 {sectors_section()}
 
 <section class="section">
@@ -811,7 +814,7 @@ def refrigeration():
 
 {equipment_section(alt=False)}
 
-{services_index_section("Refrigeration services", "Choose your equipment", alt=True, kind="refrigeration")}
+{services_index_section("Refrigeration services", "Choose your equipment", alt=True, kind="refrigeration", groups=(None, "more"))}
 
 <section class="section" id="cold-rooms">
   <div class="wrap split">
@@ -903,7 +906,7 @@ def aircon():
   </div>
 </section>
 
-{services_index_section("Aircon services", "Choose a service", kind="aircon")}
+{services_index_section("Aircon services", "Choose a service", kind="aircon", groups=(None, "more"))}
 
 <section class="section section-alt" id="install">
   <div class="wrap split">

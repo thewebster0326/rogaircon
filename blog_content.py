@@ -205,3 +205,8 @@ POSTS = [
         "related": ["aircon-servicing-durban.html", "aircon-refrigeration-umhlanga.html"],
     },
 ]
+
+# Second batch (Nov 2026), newest first
+from blog_more import MORE_POSTS  # noqa: E402
+
+POSTS = MORE_POSTS + POSTS
